@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subsea Completion Toolkit — Engineering Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ocean-deep: #020f1e;
+  --ocean-mid: #041829;
+  --ocean-panel: #071e35;
+  --ocean-card: #0a2540;
+  --ocean-border: rgba(30,120,200,0.18);
+  --ocean-border-bright: rgba(30,180,255,0.35);
+  --accent-primary: #00b4d8;
+  --accent-secondary: #0077b6;
+  --accent-warning: #f4a261;
+  --accent-danger: #e63946;
+  --accent-success: #06d6a0;
+  --text-primary: #e8f4fd;
+  --text-secondary: #8faec7;
+  --text-muted: #4a6a84;
+  --sonar: rgba(0,180,216,0.06);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--ocean-deep);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.site-header {
+  background: linear-gradient(180deg, #010c18 0%, var(--ocean-mid) 100%);
+  border-bottom: 1px solid var(--ocean-border-bright);
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--accent-primary);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-icon svg { width: 18px; height: 18px; stroke: #010c18; fill: none; stroke-width: 2; stroke-linecap: round; }
+.logo-title { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+.logo-sub { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+.header-meta {
+  display: flex; align-items: center; gap: 20px;
+  font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-success); display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* NAV TABS */
+.nav-tabs {
+  background: var(--ocean-mid);
+  border-bottom: 1px solid var(--ocean-border);
+  padding: 0 2rem;
+  display: flex; gap: 0;
+  overflow-x: auto;
+}
+.nav-tab {
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+  user-select: none;
+}
+.nav-tab:hover { color: var(--text-primary); }
+.nav-tab.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); }
+
+/* LAYOUT */
+.container { max-width: 1280px; margin: 0 auto; padding: 24px 2rem; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* METRICS GRID */
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 12px; margin-bottom: 24px; }
+.metric-card {
+  background: var(--ocean-card);
+  border: 1px solid var(--ocean-border);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--accent-line, var(--accent-primary));
+}
+.metric-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.metric-value { font-size: 26px; font-weight: 600; letter-spacing: -1px; font-family: 'JetBrains Mono', monospace; }
+.metric-unit { font-size: 12px; color: var(--text-muted); margin-left: 3px; }
+.metric-change { font-size: 11px; margin-top: 4px; }
+.up { color: var(--accent-success); }
+.warn { color: var(--accent-warning); }
+.danger { color: var(--accent-danger); }
+
+/* CARDS */
+.card {
+  background: var(--ocean-card);
+  border: 1px solid var(--ocean-border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ocean-border);
+}
+.card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.6px; }
+.badge {
+  font-size: 10px; font-family: 'JetBrains Mono', monospace;
+  padding: 3px 8px; border-radius: 4px; font-weight: 500;
+}
+.badge-ok { background: rgba(6,214,160,.12); color: var(--accent-success); }
+.badge-warn { background: rgba(244,162,97,.12); color: var(--accent-warning); }
+.badge-crit { background: rgba(230,57,70,.12); color: var(--accent-danger); }
+.badge-info { background: rgba(0,180,216,.12); color: var(--accent-primary); }
+
+/* GRID 2-COL */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media(max-width:900px) { .grid-2,.grid-3 { grid-template-columns: 1fr; } }
+
+/* CHECKLIST */
+.checklist-phase { margin-bottom: 20px; }
+.phase-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px; cursor: pointer;
+}
+.phase-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent-secondary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+.phase-title { font-size: 13px; font-weight: 600; }
+.phase-meta { margin-left: auto; font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.checklist-items { padding-left: 36px; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(30,120,200,0.08);
+  cursor: pointer;
+}
+.check-item:last-child { border-bottom: none; }
+.checkbox {
+  width: 16px; height: 16px; border-radius: 3px;
+  border: 1.5px solid var(--text-muted);
+  flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.checkbox.checked { background: var(--accent-success); border-color: var(--accent-success); }
+.checkbox.checked::after { content: '✓'; font-size: 10px; color: #010c18; font-weight: 700; }
+.check-text { font-size: 13px; flex: 1; }
+.check-text.done { text-decoration: line-through; color: var(--text-muted); }
+.check-critical { color: var(--accent-danger); font-size: 10px; font-family: 'JetBrains Mono', monospace; margin-left: auto; flex-shrink: 0; }
+.progress-bar { height: 3px; background: rgba(30,120,200,0.15); border-radius: 2px; margin-top: 6px; }
+.progress-fill { height: 100%; background: var(--accent-success); border-radius: 2px; transition: width .3s; }
+
+/* BARRIERS TABLE */
+.barrier-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.barrier-table th {
+  text-align: left; padding: 10px 12px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--ocean-border);
+}
+.barrier-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(30,120,200,0.06);
+  vertical-align: middle;
+}
+.barrier-table tr:hover td { background: var(--sonar); }
+.status-pill {
+  display: inline-block; padding: 3px 9px; border-radius: 12px;
+  font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 600;
+}
+.ok { background: rgba(6,214,160,.1); color: var(--accent-success); }
+.warn-p { background: rgba(244,162,97,.1); color: var(--accent-warning); }
+.fail { background: rgba(230,57,70,.1); color: var(--accent-danger); }
+.tbd { background: rgba(100,130,160,.1); color: var(--text-muted); }
+
+/* HYDRATE PHASE DIAGRAM */
+.phase-diagram { display: flex; gap: 0; margin-bottom: 20px; }
+.phase-zone {
+  flex: 1; padding: 16px 12px; border-right: 1px solid var(--ocean-border);
+  position: relative; text-align: center;
+}
+.phase-zone:last-child { border-right: none; }
+.phase-zone-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.phase-zone-range { font-size: 18px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+.phase-zone-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.zone-stable { border-top: 3px solid var(--accent-success); }
+.zone-risk { border-top: 3px solid var(--accent-warning); }
+.zone-critical { border-top: 3px solid var(--accent-danger); }
+
+/* LESSONS TABLE */
+.lesson-row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid rgba(30,120,200,0.08); }
+.lesson-row:last-child { border-bottom: none; }
+.lesson-cat {
+  width: 80px; flex-shrink: 0;
+  font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 600; text-transform: uppercase;
+  padding: 3px 6px; border-radius: 4px; text-align: center; margin-top: 2px;
+}
+.cat-safety { background: rgba(230,57,70,.1); color: var(--accent-danger); }
+.cat-ops { background: rgba(0,180,216,.1); color: var(--accent-primary); }
+.cat-equip { background: rgba(244,162,97,.1); color: var(--accent-warning); }
+.cat-env { background: rgba(6,214,160,.1); color: var(--accent-success); }
+.lesson-body { flex: 1; }
+.lesson-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.lesson-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.lesson-action { font-size: 11px; color: var(--accent-primary); margin-top: 5px; }
+
+/* CALCULATOR */
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.calc-group { background: var(--ocean-panel); border: 1px solid var(--ocean-border); border-radius: 8px; padding: 16px; }
+.calc-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.calc-input {
+  width: 100%; background: var(--ocean-deep); border: 1px solid var(--ocean-border);
+  border-radius: 6px; padding: 8px 12px; color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace; font-size: 14px;
+  outline: none; transition: border .15s;
+}
+.calc-input:focus { border-color: var(--accent-primary); }
+.calc-result { 
+  background: rgba(0,180,216,.06); border: 1px solid rgba(0,180,216,.2);
+  border-radius: 6px; padding: 12px; margin-top: 12px; text-align: center;
+}
+.calc-result-val { font-size: 24px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--accent-primary); }
+.calc-result-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.calc-btn {
+  background: var(--accent-secondary); border: none; border-radius: 6px;
+  color: #fff; padding: 9px 18px; font-size: 13px; font-weight: 500;
+  cursor: pointer; margin-top: 12px; width: 100%; transition: background .15s;
+}
+.calc-btn:hover { background: var(--accent-primary); }
+
+/* SECTION TITLE */
+.section-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--text-muted);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--ocean-border); }
+
+/* WELL SCHEMATIC */
+.well-schematic {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 20px 0;
+  position: relative;
+}
+.well-component {
+  width: 280px; position: relative; cursor: pointer;
+  transition: filter .15s;
+}
+.well-component:hover { filter: brightness(1.15); }
+.wc-label-right {
+  position: absolute; right: -150px; top: 50%; transform: translateY(-50%);
+  font-size: 11px; color: var(--text-secondary); white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+}
+.wc-label-right::before { content: ''; width: 40px; height: 1px; background: var(--ocean-border-bright); }
+
+/* FOOTER */
+.doc-footer {
+  text-align: center; padding: 32px 2rem; color: var(--text-muted);
+  font-size: 11px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;
+  border-top: 1px solid var(--ocean-border);
+  margin-top: 40px;
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path d="M12 8v8M8 12h8" stroke-width="1.5"/></svg>
+    </div>
+    <div>
+      <div class="logo-title">Subsea Completion Toolkit</div>
+      <div class="logo-sub">SCT · REV 3.1 · JUNE 2026</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span><span class="status-dot"></span>LIVE</span>
+    <span>DEEPWATER OPS</span>
+    <span>API 17D / ISO 13628</span>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('overview', this)">Overview</div>
+  <div class="nav-tab" onclick="switchTab('checklist', this)">Operation Checklist</div>
+  <div class="nav-tab" onclick="switchTab('barriers', this)">Well Control Barriers</div>
+  <div class="nav-tab" onclick="switchTab('hydrate', this)">Hydrate Management</div>
+  <div class="nav-tab" onclick="switchTab('lessons', this)">Lessons Learned</div>
+  <div class="nav-tab" onclick="switchTab('calculators', this)">Engineering Calculators</div>
+</nav>
+
+<!-- ===== OVERVIEW ===== -->
+<div class="container">
+<section id="overview" class="section active">
+
+  <div class="metrics-grid">
+    <div class="metric-card" style="--accent-line: var(--accent-primary)">
+      <div class="metric-label">Well Depth</div>
+      <div class="metric-value">4,280<span class="metric-unit">m TVD</span></div>
+      <div class="metric-change up">▲ Deepwater classification</div>
+    </div>
+    <div class="metric-card" style="--accent-line: var(--accent-success)">
+      <div class="metric-label">Barrier Status</div>
+      <div class="metric-value">2<span class="metric-unit">/ 2</span></div>
+      <div class="metric-change up">● Primary &amp; Secondary intact</div>
+    </div>
+    <div class="metric-card" style="--accent-line: var(--accent-warning)">
+      <div class="metric-label">Checklist Progress</div>
+      <div class="metric-value" id="overview-progress">0<span class="metric-unit">%</span></div>
+      <div class="metric-change warn" id="overview-items">Loading…</div>
+    </div>
+    <div class="metric-card" style="--accent-line: #0077b6">
+      <div class="metric-label">Hydrate Risk</div>
+      <div class="metric-value">MOD</div>
+      <div class="metric-change warn">● 4°C subcooling — monitor</div>
+    </div>
+    <div class="metric-card" style="--accent-line: var(--accent-danger)">
+      <div class="metric-label">Open Actions</div>
+      <div class="metric-value">3<span class="metric-unit">items</span></div>
+      <div class="metric-change danger">▲ Requires review</div>
+    </div>
+    <div class="metric-card" style="--accent-line: var(--accent-success)">
+      <div class="metric-label">Lessons Applied</div>
+      <div class="metric-value">12<span class="metric-unit">/ 15</span></div>
+      <div class="metric-change up">● 80% incorporation rate</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Well Schematic</div>
+        <span class="badge badge-info">SUBSEA COMPLETION</span>
+      </div>
+      <svg width="100%" viewBox="0 0 400 520" style="display:block; margin: 0 auto;">
+        <defs>
+          <linearGradient id="casing-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0a2540"/>
+            <stop offset="15%" stop-color="#1a4060"/>
+            <stop offset="85%" stop-color="#1a4060"/>
+            <stop offset="100%" stop-color="#0a2540"/>
+          </linearGradient>
+          <linearGradient id="fluid-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00b4d8" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#0077b6" stop-opacity="0.1"/>
+          </linearGradient>
+        </defs>
+        <!-- Seabed -->
+        <rect x="0" y="60" width="400" height="8" fill="rgba(100,80,40,0.5)" rx="2"/>
+        <text x="10" y="55" font-size="10" fill="#8faec7" font-family="'JetBrains Mono',monospace">SEABED ~1,500m WD</text>
+        <!-- XMT / X-mas tree -->
+        <rect x="155" y="68" width="90" height="36" rx="4" fill="#0a4060" stroke="#00b4d8" stroke-width="1.5"/>
+        <text x="200" y="84" text-anchor="middle" font-size="10" font-weight="600" fill="#00b4d8" font-family="Inter,sans-serif">SUBSEA X-MAS TREE</text>
+        <text x="200" y="97" text-anchor="middle" font-size="9" fill="#8faec7" font-family="Inter,sans-serif">Dual bore, 10K rated</text>
+        <!-- label right -->
+        <line x1="245" y1="86" x2="290" y2="86" stroke="#1e6488" stroke-width="0.7" stroke-dasharray="3,3"/>
+        <text x="293" y="89" font-size="9" fill="#8faec7" font-family="Inter,sans-serif">SXT</text>
+        <!-- Wellhead -->
+        <rect x="165" y="104" width="70" height="20" rx="3" fill="#082035" stroke="#0077b6" stroke-width="1"/>
+        <text x="200" y="118" text-anchor="middle" font-size="9" fill="#8faec7" font-family="Inter,sans-serif">Wellhead / THRT</text>
+        <!-- Conductor -->
+        <rect x="172" y="124" width="56" height="220" fill="url(#casing-grad)" stroke="#1a4060" stroke-width="1"/>
+        <!-- Production casing -->
+        <rect x="182" y="124" width="36" height="200" fill="url(#fluid-grad)" stroke="#0a3050" stroke-width="0.5"/>
+        <!-- Production tubing (inner) -->
+        <rect x="190" y="124" width="20" height="180" fill="rgba(0,100,180,0.15)" stroke="#0077b6" stroke-width="1" stroke-dasharray="4,2"/>
+        <!-- Packer -->
+        <rect x="184" y="300" width="32" height="12" rx="3" fill="#f4a261" stroke="#c47c30" stroke-width="1"/>
+        <text x="200" y="309" text-anchor="middle" font-size="8" fill="#020f1e" font-weight="700" font-family="Inter,sans-serif">PACKER</text>
+        <line x1="217" y1="305" x2="270" y2="305" stroke="#f4a261" stroke-width="0.7" stroke-dasharray="3,3"/>
+        <text x="273" y="308" font-size="9" fill="#f4a261" font-family="Inter,sans-serif">PBR + Packer</text>
+        <!-- Perforations -->
+        <g>
+          <line x1="188" y1="345" x2="175" y2="345" stroke="#e63946" stroke-width="1.5"/>
+          <line x1="188" y1="355" x2="175" y2="355" stroke="#e63946" stroke-width="1.5"/>
+          <line x1="212" y1="345" x2="225" y2="345" stroke="#e63946" stroke-width="1.5"/>
+          <line x1="212" y1="355" x2="225" y2="355" stroke="#e63946" stroke-width="1.5"/>
+          <text x="200" y="362" text-anchor="middle" font-size="8" fill="#e63946" font-family="Inter,sans-serif">PERFS</text>
+        </g>
+        <!-- Formation -->
+        <rect x="0" y="370" width="400" height="80" rx="4" fill="rgba(80,60,20,0.2)" stroke="rgba(100,80,40,0.3)" stroke-width="0.5"/>
+        <text x="200" y="400" text-anchor="middle" font-size="10" fill="#8a7a50" font-family="Inter,sans-serif">RESERVOIR ZONE — 4,280m TVD</text>
+        <text x="200" y="415" text-anchor="middle" font-size="9" fill="#6a5a3a" font-family="Inter,sans-serif">Sandstone / 35° API crude</text>
+        <!-- SCSSVs label -->
+        <circle cx="200" cy="185" r="5" fill="none" stroke="#06d6a0" stroke-width="1.5"/>
+        <line x1="205" y1="185" x2="270" y2="185" stroke="#06d6a0" stroke-width="0.7" stroke-dasharray="3,3"/>
+        <text x="273" y="188" font-size="9" fill="#06d6a0" font-family="Inter,sans-serif">SCSSV</text>
+        <!-- Umbilical -->
+        <line x1="155" y1="80" x2="60" y2="30" stroke="#4a8ab0" stroke-width="2" stroke-dasharray="5,3"/>
+        <text x="20" y="28" font-size="9" fill="#4a8ab0" font-family="Inter,sans-serif">UMBILICAL</text>
+        <!-- Flow arrow -->
+        <path d="M200 320 L200 290" stroke="#00b4d8" stroke-width="1.5" fill="none" marker-end="url(#marrow)"/>
+        <defs><marker id="marrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#00b4d8"/></marker></defs>
+        <!-- Depth ticks -->
+        <line x1="130" y1="68" x2="130" y2="370" stroke="rgba(30,100,180,0.15)" stroke-width="0.5"/>
+        <text x="125" y="68" text-anchor="end" font-size="8" fill="#4a6a84" font-family="'JetBrains Mono',monospace">0m</text>
+        <text x="125" y="200" text-anchor="end" font-size="8" fill="#4a6a84" font-family="'JetBrains Mono',monospace">~2km</text>
+        <text x="125" y="370" text-anchor="end" font-size="8" fill="#4a6a84" font-family="'JetBrains Mono',monospace">~4km</text>
+      </svg>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Operation Timeline</div>
+          <span class="badge badge-info">HORIZONTAL WELL</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0;">
+          <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid rgba(30,120,200,0.08);">
+            <div style="width:28px; height:28px; border-radius:50%; background:#06d6a0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#010c18; flex-shrink:0;">✓</div>
+            <div><div style="font-size:12px; font-weight:500;">Pre-job planning &amp; HAZID</div><div style="font-size:11px; color:#8faec7; margin-top:2px;">Equipment matrix, risk register, MOC</div></div>
+            <div style="margin-left:auto; font-size:10px; color:#06d6a0; font-family:'JetBrains Mono',monospace; white-space:nowrap;">COMPLETE</div>
+          </div>
+          <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid rgba(30,120,200,0.08);">
+            <div style="width:28px; height:28px; border-radius:50%; background:#06d6a0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#010c18; flex-shrink:0;">✓</div>
+            <div><div style="font-size:12px; font-weight:500;">Wellbore conditioning &amp; clean-up</div><div style="font-size:11px; color:#8faec7; margin-top:2px;">Acid wash, gauge run, fluid substitution</div></div>
+            <div style="margin-left:auto; font-size:10px; color:#06d6a0; font-family:'JetBrains Mono',monospace; white-space:nowrap;">COMPLETE</div>
+          </div>
+          <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid rgba(30,120,200,0.08);">
+            <div style="width:28px; height:28px; border-radius:50%; background:#06d6a0; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#010c18; flex-shrink:0;">✓</div>
+            <div><div style="font-size:12px; font-weight:500;">Lower completion run</div><div style="font-size:11px; color:#8faec7; margin-top:2px;">Screens, sand control, inflow control</div></div>
+            <div style="margin-left:auto; font-size:10px; color:#06d6a0; font-family:'JetBrains Mono',monospace; white-space:nowrap;">COMPLETE</div>
+          </div>
+          <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid rgba(30,120,200,0.08);">
+            <div style="width:28px; height:28px; border-radius:50%; background:#00b4d8; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#010c18; flex-shrink:0;">→</div>
+            <div><div style="font-size:12px; font-weight:500;">Upper completion &amp; packer setting</div><div style="font-size:11px; color:#8faec7; margin-top:2px;">Tubing run, SCSSV install, packer set</div></div>
+            <div style="margin-left:auto; font-size:10px; color:#00b4d8; font-family:'JetBrains Mono',monospace; white-space:nowrap;">IN PROGRESS</div>
+          </div>
+          <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid rgba(30,120,200,0.08);">
+            <div style="width:28px; height:28px; border-radius:50%; background:var(--ocean-border); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#4a6a84; flex-shrink:0;">5</div>
+            <div><div style="font-size:12px; font-weight:500; color:#4a6a84;">Tree installation &amp; connections</div><div style="font-size:11px; color:#3a5a74; margin-top:2px;">XMT run, umbilical connect, IWOCS</div></div>
+            <div style="margin-left:auto; font-size:10px; color:#4a6a84; font-family:'JetBrains Mono',monospace; white-space:nowrap;">PENDING</div>
+          </div>
+          <div style="display:flex; gap:12px; padding:10px 0;">
+            <div style="width:28px; height:28px; border-radius:50%; background:var(--ocean-border); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#4a6a84; flex-shrink:0;">6</div>
+            <div><div style="font-size:12px; font-weight:500; color:#4a6a84;">Well testing &amp; handover</div><div style="font-size:11px; color:#3a5a74; margin-top:2px;">DST, PLT, PITA test, production start</div></div>
+            <div style="margin-left:auto; font-size:10px; color:#4a6a84; font-family:'JetBrains Mono',monospace; white-space:nowrap;">PENDING</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:0;">
+        <div class="card-header">
+          <div class="card-title">Key References</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; font-size:12px;">
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(30,120,200,0.06);">
+            <span style="color:var(--text-secondary);">Design standard</span>
+            <span style="font-family:'JetBrains Mono',monospace; color:var(--accent-primary);">API 17D / ISO 13628-4</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(30,120,200,0.06);">
+            <span style="color:var(--text-secondary);">Well control</span>
+            <span style="font-family:'JetBrains Mono',monospace; color:var(--accent-primary);">IWCF / API RP 16D</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(30,120,200,0.06);">
+            <span style="color:var(--text-secondary);">Hydrate prediction</span>
+            <span style="font-family:'JetBrains Mono',monospace; color:var(--accent-primary);">CSMHyd / MultiFlash</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:6px 0;">
+            <span style="color:var(--text-secondary);">Material class</span>
+            <span style="font-family:'JetBrains Mono',monospace; color:var(--accent-primary);">NACE MR0175 / ISO 15156</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ===== CHECKLIST ===== -->
+<section id="checklist" class="section">
+  <div class="section-title">Completion Operation Checklist</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Overall Progress</div>
+      <span class="badge badge-info" id="overall-badge">0 / 20 Complete</span>
+    </div>
+    <div class="progress-bar" style="height:6px; margin-top:0;">
+      <div class="progress-fill" id="overall-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div id="checklist-container"></div>
+
+</section>
+
+<!-- ===== BARRIERS ===== -->
+<section id="barriers" class="section">
+  <div class="section-title">Well Control Barrier Verification</div>
+
+  <div class="metrics-grid">
+    <div class="metric-card" style="--accent-line: var(--accent-success)">
+      <div class="metric-label">Primary Barrier</div>
+      <div class="metric-value" style="font-size:18px; color:var(--accent-success)">INTACT</div>
+      <div class="metric-change up">Tubing + SCSSV + WH</div>
+    </div>
+    <div class="metric-card" style="--accent-line: var(--accent-success)">
+      <div class="metric-label">Secondary Barrier</div>
+      <div class="metric-value" style="font-size:18px; color:var(--accent-success)">INTACT</div>
+      <div class="metric-change up">Casing + XMT + Annulus</div>
+    </div>
+    <div class="metric-card" style="--accent-line: var(--accent-warning)">
+      <div class="metric-label">Last Function Test</div>
+      <div class="metric-value" style="font-size:18px;">D-14</div>
+      <div class="metric-change warn">Next test due D-0</div>
+    </div>
+    <div class="metric-card" style="--accent-line: var(--accent-primary)">
+      <div class="metric-label">MAWOP</div>
+      <div class="metric-value">690<span class="metric-unit">bar</span></div>
+      <div class="metric-change up">Current TP: 480 bar</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Primary Barrier Elements</div>
+        <span class="badge badge-ok">VERIFIED</span>
+      </div>
+      <table class="barrier-table">
+        <thead>
+          <tr><th>Element</th><th>Type</th><th>Pressure Rating</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Production Packer</td><td>Permanent / Mech</td><td>690 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>Production Tubing</td><td>5.5" 23 lb/ft L80</td><td>760 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>SCSSV</td><td>Flapper / DHSV</td><td>690 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>Tubing Hanger</td><td>Mandrel type</td><td>690 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>XMT Prod Valve (PMV/PWV)</td><td>Ball / HCM</td><td>690 bar</td><td><span class="status-pill warn-p">TEST DUE</span></td></tr>
+          <tr><td>Landing String Valve</td><td>BIV + SSIV</td><td>690 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Secondary Barrier Elements</div>
+        <span class="badge badge-ok">VERIFIED</span>
+      </div>
+      <table class="barrier-table">
+        <thead>
+          <tr><th>Element</th><th>Type</th><th>Pressure Rating</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Casing Shoe</td><td>9-5/8" Float shoe</td><td>800 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>Production Casing</td><td>9-5/8" 47 lb/ft P110</td><td>800 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>Wellhead Housing</td><td>18-3/4" 10K</td><td>690 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>Annulus Master Valve</td><td>Ball / HCM-A</td><td>690 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+          <tr><td>Swab Valve (XMT Crown)</td><td>Ball / WCM</td><td>690 bar</td><td><span class="status-pill warn-p">VERIFY</span></td></tr>
+          <tr><td>Riser / LMRP Annular</td><td>Hydril AX 18-3/4"</td><td>345 bar</td><td><span class="status-pill ok">OK</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Pressure Test Log</div>
+      <span class="badge badge-info">API RP 16D</span>
+    </div>
+    <table class="barrier-table">
+      <thead>
+        <tr><th>Component</th><th>Low Test (bar)</th><th>High Test (bar)</th><th>Hold (min)</th><th>Result</th><th>Date</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Tubing string</td><td>70</td><td>480</td><td>10</td><td><span class="status-pill ok">PASS</span></td><td style="font-family:'JetBrains Mono',monospace; font-size:11px;">2026-06-04</td></tr>
+        <tr><td>SCSSV open / close</td><td>70</td><td>480</td><td>5</td><td><span class="status-pill ok">PASS</span></td><td style="font-family:'JetBrains Mono',monospace; font-size:11px;">2026-06-04</td></tr>
+        <tr><td>XMT PMV / PMFL</td><td>70</td><td>480</td><td>10</td><td><span class="status-pill warn-p">PENDING</span></td><td style="font-family:'JetBrains Mono',monospace; font-size:11px;">TBD</td></tr>
+        <tr><td>Annulus casing</td><td>70</td><td>300</td><td>10</td><td><span class="status-pill ok">PASS</span></td><td style="font-family:'JetBrains Mono',monospace; font-size:11px;">2026-06-03</td></tr>
+        <tr><td>Landing string SSIV</td><td>70</td><td>480</td><td>5</td><td><span class="status-pill ok">PASS</span></td><td style="font-family:'JetBrains Mono',monospace; font-size:11px;">2026-06-05</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== HYDRATE ===== -->
+<section id="hydrate" class="section">
+  <div class="section-title">Hydrate Management Guide</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Phase Envelope — Current Conditions</div>
+      <span class="badge badge-warn">MONITOR</span>
+    </div>
+    <div class="phase-diagram" style="border:1px solid var(--ocean-border); border-radius:8px; overflow:hidden; margin-bottom:16px;">
+      <div class="phase-zone zone-stable">
+        <div class="phase-zone-name" style="color:var(--accent-success);">No Risk</div>
+        <div class="phase-zone-range" style="color:var(--accent-success);">&gt;24°C</div>
+        <div class="phase-zone-label">At system pressure</div>
+      </div>
+      <div class="phase-zone zone-risk">
+        <div class="phase-zone-name" style="color:var(--accent-warning);">Subcooling</div>
+        <div class="phase-zone-range" style="color:var(--accent-warning);">4–24°C</div>
+        <div class="phase-zone-label">MEG injection required</div>
+      </div>
+      <div class="phase-zone zone-critical">
+        <div class="phase-zone-name" style="color:var(--accent-danger);">Critical</div>
+        <div class="phase-zone-range" style="color:var(--accent-danger);">&lt;4°C</div>
+        <div class="phase-zone-label">Immediate remediation</div>
+      </div>
+    </div>
+
+    <div style="background:rgba(0,180,216,0.05); border:1px solid rgba(0,180,216,0.15); border-radius:8px; padding:14px; margin-bottom:16px;">
+      <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.6px;">Current Conditions (Flowline Tie-in)</div>
+      <div style="display:flex; gap:24px; flex-wrap:wrap;">
+        <div><span style="font-size:12px; color:var(--text-secondary);">Temp: </span><span style="font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--accent-warning);">18°C</span></div>
+        <div><span style="font-size:12px; color:var(--text-secondary);">Pressure: </span><span style="font-family:'JetBrains Mono',monospace; font-weight:600;">280 bar</span></div>
+        <div><span style="font-size:12px; color:var(--text-secondary);">HEP: </span><span style="font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--accent-warning);">22°C @ 280 bar</span></div>
+        <div><span style="font-size:12px; color:var(--text-secondary);">Subcooling: </span><span style="font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--accent-warning);">4°C ▲</span></div>
+        <div><span style="font-size:12px; color:var(--text-secondary);">MEG Rate: </span><span style="font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--accent-success);">85 L/hr</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Prevention Measures</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <span style="color:var(--accent-success); font-size:16px; flex-shrink:0; line-height:1.4;">●</span>
+          <div><strong style="font-weight:500;">MEG continuous injection</strong> — 85 L/hr at subsea injection valve. Target concentration: 35 wt% in free water phase. Monitor via flowcomputer and injection meter.</div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <span style="color:var(--accent-success); font-size:16px; flex-shrink:0; line-height:1.4;">●</span>
+          <div><strong style="font-weight:500;">Depressurisation protocol</strong> — For planned shutdowns &gt;4 hrs: depressurise to &lt;50 bar or maintain MEG injection for duration. Coordinate with production operations.</div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <span style="color:var(--accent-success); font-size:16px; flex-shrink:0; line-height:1.4;">●</span>
+          <div><strong style="font-weight:500;">Thermal monitoring</strong> — Check DTS (distributed temp sensing) every 30 min during well test. Alert threshold: ΔT ≤ 15°C from HEP.</div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <span style="color:var(--accent-warning); font-size:16px; flex-shrink:0; line-height:1.4;">●</span>
+          <div><strong style="font-weight:500;">Dead oil displacement</strong> — Available as backup for emergency shutdown. 20 m³ stored on vessel. Procedure in EOSP Annex C.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Remediation Procedure</div>
+        <span class="badge badge-crit">EMERGENCY USE</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:0;">
+        <div style="padding:10px 0; border-bottom:1px solid rgba(230,57,70,0.1); display:flex; gap:10px;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-danger); flex-shrink:0; width:24px;">01</span>
+          <span style="font-size:12px;">Identify hydrate location via choke ΔP, DTS or flow anomaly. Isolate affected segment at XMT.</span>
+        </div>
+        <div style="padding:10px 0; border-bottom:1px solid rgba(230,57,70,0.1); display:flex; gap:10px;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-danger); flex-shrink:0; width:24px;">02</span>
+          <span style="font-size:12px;">Depressurise wellbore side of hydrate plug to thermodynamic equilibrium. Rate: ≤50 bar/hr.</span>
+        </div>
+        <div style="padding:10px 0; border-bottom:1px solid rgba(230,57,70,0.1); display:flex; gap:10px;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-danger); flex-shrink:0; width:24px;">03</span>
+          <span style="font-size:12px;">Batch-inject warm MEG (50°C) at 100 L/hr via annulus line. DO NOT apply heat from one side only.</span>
+        </div>
+        <div style="padding:10px 0; border-bottom:1px solid rgba(230,57,70,0.1); display:flex; gap:10px;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-danger); flex-shrink:0; width:24px;">04</span>
+          <span style="font-size:12px;">Monitor pressure equilibration. Allow 4–8 hrs for dissociation. No mechanical tools through plug.</span>
+        </div>
+        <div style="padding:10px 0; display:flex; gap:10px;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-danger); flex-shrink:0; width:24px;">05</span>
+          <span style="font-size:12px;">Resume production at reduced choke (15%) until 30-min stable flow confirmed. Notify Wells Engineer.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LESSONS ===== -->
+<section id="lessons" class="section">
+  <div class="section-title">Lessons Learned — Horizontal Wells</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Category Filter</div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button onclick="filterLessons('all')" id="btn-all" class="calc-btn" style="width:auto; padding:6px 16px; background:var(--accent-primary);">All</button>
+      <button onclick="filterLessons('safety')" id="btn-safety" class="calc-btn" style="width:auto; padding:6px 16px; background:rgba(230,57,70,.2); color:var(--accent-danger);">Safety</button>
+      <button onclick="filterLessons('ops')" id="btn-ops" class="calc-btn" style="width:auto; padding:6px 16px; background:rgba(0,180,216,.2); color:var(--accent-primary);">Operations</button>
+      <button onclick="filterLessons('equip')" id="btn-equip" class="calc-btn" style="width:auto; padding:6px 16px; background:rgba(244,162,97,.2); color:var(--accent-warning);">Equipment</button>
+      <button onclick="filterLessons('env')" id="btn-env" class="calc-btn" style="width:auto; padding:6px 16px; background:rgba(6,214,160,.2); color:var(--accent-success);">Environment</button>
+    </div>
+  </div>
+
+  <div class="card" id="lessons-container">
+    <!-- populated by JS -->
+  </div>
+</section>
+
+<!-- ===== CALCULATORS ===== -->
+<section id="calculators" class="section">
+  <div class="section-title">Engineering Calculators</div>
+
+  <div class="grid-2">
+    <!-- Hydrostatic Pressure -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Hydrostatic Pressure</div>
+        <span class="badge badge-info">P = ρgh</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div><div class="calc-label">Fluid Density (kg/m³)</div><input class="calc-input" id="hp-rho" type="number" value="1030" placeholder="e.g. 1030"></div>
+        <div><div class="calc-label">Depth / TVD (m)</div><input class="calc-input" id="hp-depth" type="number" value="4280" placeholder="e.g. 4280"></div>
+        <button class="calc-btn" onclick="calcHP()">Calculate →</button>
+        <div class="calc-result">
+          <div class="calc-result-val" id="hp-result">—</div>
+          <div class="calc-result-label">Hydrostatic Pressure (bar)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Burst Pressure -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Pipe Burst Pressure</div>
+        <span class="badge badge-info">Barlow's Formula</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div><div class="calc-label">Wall Thickness (mm)</div><input class="calc-input" id="bp-t" type="number" value="9.17" placeholder="e.g. 9.17"></div>
+        <div><div class="calc-label">Outside Diameter (mm)</div><input class="calc-input" id="bp-od" type="number" value="139.7" placeholder="e.g. 139.7 = 5.5in"></div>
+        <div><div class="calc-label">SMYS / Yield Strength (MPa)</div><input class="calc-input" id="bp-smys" type="number" value="552" placeholder="e.g. 552 = L80"></div>
+        <button class="calc-btn" onclick="calcBurst()">Calculate →</button>
+        <div class="calc-result">
+          <div class="calc-result-val" id="bp-result">—</div>
+          <div class="calc-result-label">Min. Burst Pressure (bar)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEG Concentration -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">MEG Concentration for Hydrate Inhibition</div>
+        <span class="badge badge-info">Hammerschmidt</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div><div class="calc-label">Hydrate Equilibrium Temperature (°C)</div><input class="calc-input" id="meg-hep" type="number" value="22" placeholder="e.g. 22"></div>
+        <div><div class="calc-label">Required Depression ΔT (°C)</div><input class="calc-input" id="meg-dt" type="number" value="10" placeholder="e.g. 10 for 4°C safety margin"></div>
+        <button class="calc-btn" onclick="calcMEG()">Calculate →</button>
+        <div class="calc-result">
+          <div class="calc-result-val" id="meg-result">—</div>
+          <div class="calc-result-label">Required MEG wt% in free water</div>
+        </div>
+        <div style="font-size:11px; color:var(--text-muted);">Hammerschmidt: W = 100·M·ΔT / (K + M·ΔT) where K=2335 (MEG), M=62.07 g/mol</div>
+      </div>
+    </div>
+
+    <!-- Collapse Pressure -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Annular Volume</div>
+        <span class="badge badge-info">Vol = π/4·(D²-d²)·L</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div><div class="calc-label">Outer Diameter — Casing ID (mm)</div><input class="calc-input" id="av-od" type="number" value="221.5" placeholder="e.g. 221.5 = 8.72in"></div>
+        <div><div class="calc-label">Inner Diameter — Tubing OD (mm)</div><input class="calc-input" id="av-id" type="number" value="139.7" placeholder="e.g. 139.7 = 5.5in"></div>
+        <div><div class="calc-label">Interval Length (m)</div><input class="calc-input" id="av-len" type="number" value="1000" placeholder="e.g. 1000"></div>
+        <button class="calc-btn" onclick="calcAV()">Calculate →</button>
+        <div class="calc-result">
+          <div class="calc-result-val" id="av-result">—</div>
+          <div class="calc-result-label">Annular Volume (m³ / bbl)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<footer class="doc-footer">
+  SUBSEA COMPLETION TOOLKIT · ENGINEER MOHAMED · REV 3.1 · JUNE 2026 · API 17D / ISO 13628-4 COMPLIANT
+</footer>
+
+<script>
+// ---- TAB SWITCHING ----
+function switchTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ---- CHECKLIST DATA ----
+const phases = [
+  {
+    num: '01', title: 'Pre-Job Planning', color: '#0077b6',
+    items: [
+      { text: 'HAZID/HAZOP completed and all actions closed', critical: true },
+      { text: 'Equipment matrix reviewed and signed off by Team Lead', critical: true },
+      { text: 'Management of Change (MOC) approved', critical: false },
+      { text: 'BOP stack function tested and pressure tested to MAWHP', critical: true },
+      { text: 'Completion fluid specifications confirmed — density, filtration, compatibility', critical: false },
+    ]
+  },
+  {
+    num: '02', title: 'Wellbore Preparation', color: '#00b4d8',
+    items: [
+      { text: 'Gauge run completed — minimum drift confirmed per tubing ID', critical: true },
+      { text: 'Wellbore clean-up circulation achieved — NTU ≤5 at surface', critical: false },
+      { text: 'CASING pressure tested — 70 bar low, full MAWOP high, 10 min hold', critical: true },
+      { text: 'Fluid density confirmed at wellhead vs mudlogging unit', critical: false },
+    ]
+  },
+  {
+    num: '03', title: 'Lower Completion Run', color: '#06d6a0',
+    items: [
+      { text: 'Screen / ICD assembly MPI and dimensional checks complete', critical: true },
+      { text: 'Make-up torque recorded for all connections — within API range', critical: true },
+      { text: 'Centralizers installed per casing programme', critical: false },
+      { text: 'Depth correlation confirmed — GR gamma match ±0.5m', critical: false },
+      { text: 'Gravel pack or frac pack execution within design parameters', critical: false },
+    ]
+  },
+  {
+    num: '04', title: 'Upper Completion & Tree', color: '#f4a261',
+    items: [
+      { text: 'Packer set — confirmed by weight-set indicator and pressure test', critical: true },
+      { text: 'SCSSV installed and function tested per API 14A', critical: true },
+      { text: 'Landing string pressure tested — tubing and annulus', critical: true },
+      { text: 'XMT installed, tested and locked — all valves function checked', critical: true },
+      { text: 'Umbilical connected, flushed and pressure-tested — all lines', critical: false },
+      { text: 'Well handover document completed and signed by Company Rep', critical: false },
+    ]
+  },
+];
+
+let checkState = {};
+let totalItems = 0;
+
+function buildChecklist() {
+  const cont = document.getElementById('checklist-container');
+  phases.forEach((phase, pi) => {
+    const div = document.createElement('div');
+    div.className = 'card checklist-phase';
+    let itemsHtml = phase.items.map((item, ii) => {
+      const key = `${pi}-${ii}`;
+      totalItems++;
+      checkState[key] = false;
+      return `<div class="check-item" onclick="toggleCheck('${key}')">
+        <div class="checkbox" id="cb-${key}"></div>
+        <div class="check-text" id="ct-${key}">${item.text}</div>
+        ${item.critical ? '<span class="check-critical">★ CRITICAL</span>' : ''}
+      </div>`;
+    }).join('');
+    div.innerHTML = `
+      <div class="card-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:28px; height:28px; border-radius:50%; background:${phase.color}; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#010c18; font-family:'JetBrains Mono',monospace;">${phase.num}</div>
+          <div class="card-title">${phase.title}</div>
+        </div>
+        <span class="badge badge-info" id="phase-badge-${pi}">0 / ${phase.items.length}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="phase-fill-${pi}" style="width:0%;"></div></div>
+      <div style="margin-top:12px;">${itemsHtml}</div>`;
+    cont.appendChild(div);
+  });
+  updateProgress();
+}
+
+function toggleCheck(key) {
+  checkState[key] = !checkState[key];
+  const cb = document.getElementById('cb-' + key);
+  const ct = document.getElementById('ct-' + key);
+  cb.className = 'checkbox' + (checkState[key] ? ' checked' : '');
+  ct.className = 'check-text' + (checkState[key] ? ' done' : '');
+  updateProgress();
+}
+
+function updateProgress() {
+  let totalDone = 0;
+  phases.forEach((phase, pi) => {
+    let done = 0;
+    phase.items.forEach((_, ii) => { if (checkState[`${pi}-${ii}`]) done++; });
+    totalDone += done;
+    const pct = Math.round(done / phase.items.length * 100);
+    const fill = document.getElementById('phase-fill-' + pi);
+    const badge = document.getElementById('phase-badge-' + pi);
+    if (fill) fill.style.width = pct + '%';
+    if (badge) badge.textContent = `${done} / ${phase.items.length}`;
+  });
+  const overall = Math.round(totalDone / totalItems * 100);
+  document.getElementById('overall-fill').style.width = overall + '%';
+  document.getElementById('overall-badge').textContent = `${totalDone} / ${totalItems} Complete`;
+  document.getElementById('overview-progress').innerHTML = overall + '<span class="metric-unit">%</span>';
+  document.getElementById('overview-items').textContent = `${totalDone} of ${totalItems} items done`;
+}
+
+// ---- LESSONS DATA ----
+const lessons = [
+  { cat: 'safety', catLabel: 'SAFETY', title: 'Barrier verification before every pipe movement', desc: 'Multiple incidents occurred when pipe was moved without confirming both barriers were in place. Procedure now mandates dual-barrier confirmation sign-off before any string movement in H-well operations.', action: '→ ACTION: Use barrier verification card — Annex B.' },
+  { cat: 'ops', catLabel: 'OPERATIONS', title: 'Horizontal torque limits on connections — tailor to well trajectory', desc: 'Standard API torque tables do not account for side-loading in highly deviated wells. In wells >80° deviation, friction adds 15–25% effective makeup torque, leading to under-torqued connections when using flat field makeup procedures.', action: '→ ACTION: Use casing contractor tally with trajectory-adjusted values.' },
+  { cat: 'equip', catLabel: 'EQUIPMENT', title: 'SCSSV control line integrity test before installation', desc: 'Two completion strings required re-entry due to leaking SCSSV control lines identified only after completion. Protocol now requires pressure hold test of full umbilical / control line assembly prior to tree run.', action: '→ ACTION: 480-bar hold, 15 min, on assembled line before BOP pull.' },
+  { cat: 'env', catLabel: 'ENVIRONMENT', title: 'Completion fluid spill prevention — secondary containment', desc: 'Zinc bromide and cesium formate dense brines pose significant environmental risk. Several near-miss spills recorded during fluid transfers. Dedicated drip trays and closed-loop transfer skids are now mandatory for HPHT completion operations.', action: '→ ACTION: COSHH pack required onsite; tertiary containment for ZnBr2.' },
+  { cat: 'ops', catLabel: 'OPERATIONS', title: 'Screen placement confirmation — GR depth correlation critical', desc: 'Off-depth screen placement resulted in uncontrolled formation sand production and a failed gravel pack in two horizontal producers. Downhole gamma-ray depth correlation must match surface tally to within ±0.5m before any screen release.', action: '→ ACTION: Confirm correlation with wireline depth before landing.' },
+  { cat: 'equip', catLabel: 'EQUIPMENT', title: 'ICD erosion risk at high GOR — select appropriate nozzle ID', desc: 'Inflow control devices installed for water management showed accelerated erosion failure modes when used in high-GOR wells. Nozzle ID selection must use updated erosional velocity calculation (API RP 14E) for reservoir fluid with free gas.', action: '→ ACTION: Request ICD sizing review from reservoir engineering for any GOR >200 scf/bbl.' },
+  { cat: 'safety', catLabel: 'SAFETY', title: 'Dead man anchor installation timing — H&P requirement', desc: 'Incidents at industry level attributed to inadequate floorhand anchoring in horizontal open-hole sections. Well programme must specify H&P (Hydrostatic & Pressure) dead-man installation prior to any open-hole tool deployment beyond 60° inclination.', action: '→ ACTION: Document in Well Programme, Section 7 — Contingency.' },
+];
+
+let currentFilter = 'all';
+function buildLessons() {
+  renderLessons(lessons);
+}
+function filterLessons(cat) {
+  currentFilter = cat;
+  const filtered = cat === 'all' ? lessons : lessons.filter(l => l.cat === cat);
+  renderLessons(filtered);
+}
+function renderLessons(data) {
+  const cont = document.getElementById('lessons-container');
+  cont.innerHTML = data.map(l => `
+    <div class="lesson-row">
+      <div class="lesson-cat cat-${l.cat}">${l.catLabel}</div>
+      <div class="lesson-body">
+        <div class="lesson-title">${l.title}</div>
+        <div class="lesson-desc">${l.desc}</div>
+        <div class="lesson-action">${l.action}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ---- CALCULATORS ----
+function calcHP() {
+  const rho = parseFloat(document.getElementById('hp-rho').value);
+  const d = parseFloat(document.getElementById('hp-depth').value);
+  if (isNaN(rho) || isNaN(d)) return;
+  const bar = (rho * 9.81 * d / 1e5).toFixed(1);
+  document.getElementById('hp-result').textContent = bar + ' bar';
+}
+function calcBurst() {
+  const t = parseFloat(document.getElementById('bp-t').value);
+  const od = parseFloat(document.getElementById('bp-od').value);
+  const smys = parseFloat(document.getElementById('bp-smys').value);
+  if (isNaN(t)||isNaN(od)||isNaN(smys)) return;
+  const burst_mpa = (2 * t * smys * 0.875) / od;
+  document.getElementById('bp-result').textContent = (burst_mpa * 10).toFixed(0) + ' bar';
+}
+function calcMEG() {
+  const hep = parseFloat(document.getElementById('meg-hep').value);
+  const dt = parseFloat(document.getElementById('meg-dt').value);
+  if (isNaN(hep)||isNaN(dt)) return;
+  const K = 2335, M = 62.07;
+  const W = (100 * M * dt) / (K + M * dt);
+  document.getElementById('meg-result').textContent = W.toFixed(1) + ' wt%';
+}
+function calcAV() {
+  const od = parseFloat(document.getElementById('av-od').value) / 1000;
+  const id = parseFloat(document.getElementById('av-id').value) / 1000;
+  const len = parseFloat(document.getElementById('av-len').value);
+  if (isNaN(od)||isNaN(id)||isNaN(len)) return;
+  const vol_m3 = Math.PI / 4 * (od*od - id*id) * len;
+  const vol_bbl = vol_m3 * 6.2898;
+  document.getElementById('av-result').textContent = vol_m3.toFixed(2) + ' m³ / ' + vol_bbl.toFixed(1) + ' bbl';
+}
+
+// ---- INIT ----
+buildChecklist();
+buildLessons();
+</script>
+
+</body>
+</html>
